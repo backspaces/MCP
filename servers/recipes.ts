@@ -20,6 +20,21 @@ const recipes = {
     ingredients: ["3 eggs", "butter", "salt", "cheese or herbs"],
     steps: ["Beat eggs with salt", "Melt butter, add eggs", "Stir, fill, fold"],
   },
+  pasta: {
+    serves: 4,
+    ingredients: ["1 lb spaghetti", "28 oz can crushed tomatoes", "4 garlic cloves", "3 tbsp olive oil",
+      "chili flakes", "basil", "parmesan", "salt"],
+    steps: ["Cook garlic gently in oil", "Add tomatoes and chili, simmer 15 min",
+      "Boil spaghetti, save a cup of water", "Toss with sauce and splashes of water",
+      "Top with basil and parmesan"],
+  },
+  soup: {
+    serves: 4,
+    ingredients: ["2 tbsp olive oil", "1 onion", "2 carrots", "2 celery stalks", "2 garlic cloves",
+      "1 can (15 oz) white beans", "28 oz can diced tomatoes", "4 cups vegetable broth", "salt and pepper"],
+    steps: ["Chop the vegetables", "Soften onion, carrot, celery in oil, 8 min", "Add garlic, 1 min",
+      "Add beans, tomatoes, broth; simmer 20 min", "Season to taste"],
+  },
 };
 
 const show = (name) => {

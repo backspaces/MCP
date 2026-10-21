@@ -27,25 +27,51 @@ prompts as extras.
   - the resources `recipe://index` and `recipe://{name}`
   - the prompt `plan_meal`
 
-## Running one
+## Running one in Claude Code
 
-The same file runs two ways.
+Claude Code (the `claude` CLI, and the Claude Code panel in VS Code) starts the
+servers itself over stdio. Nothing is left running, and there's nothing to host.
+All three are listed in [.mcp.json](.mcp.json), so starting Claude Code in this
+repo picks them up, after a one-time approval. To add a new one, run this from the repo:
 
-**Locally over stdio**: the AI app starts the server itself. Nothing is left
-running, and there's nothing to host. Add it to Claude Code with:
+    claude mcp add --scope project dice -- deno run -A ./servers/dice.ts --stdio
 
-    claude mcp add --scope user dice -- deno run -A /full/path/to/MCP/servers/dice.ts --stdio
+| Part | Read by | Meaning |
+| --- | --- | --- |
+| `claude mcp add` | Claude Code | add a server to its list |
+| `--scope project` | Claude Code | save it in `.mcp.json` here (the default, `local`, is private to you) |
+| *(no `--transport`)* | Claude Code | stdio is the default: Claude Code starts the program itself |
+| `dice` | Claude Code | the server's name, as in `/mcp` and `mcp__dice__roll_dice` |
+| `--` | Claude Code | the rest is the server's command, so `-A` isn't read as a `claude` option |
+| `deno run -A` | Deno | run a script, allowing network, files and env |
+| `./servers/dice.ts` | Deno | the script, relative to where Claude Code started, so only inside this repo |
+| `--stdio` | `mcp.ts` | talk over stdin/stdout; required, since without it the file only exports a web handler and exits |
 
-**Over HTTP**: you run the server, and apps connect to its URL.
+Everything after `--` becomes the entry's `command` and `args` in `.mcp.json`.
 
-    deno serve -A --port 8787 servers/recipes.ts
-    claude mcp add --transport http --scope user recipes http://localhost:8787/
+stdio means standard input and output, the two pipes every program has. The
+app writes JSON requests into the server's stdin and reads replies from its
+stdout, one message per line. A third pipe, stderr, is for logs and errors,
+which the app ignores. That's why Deno's warning `Detected export default
+{ fetch }, did you mean to run "deno serve"?` is harmless: it goes to stderr.
 
-Open http://localhost:8787/ in a browser to see what the server offers. The page
-is built live from the server's own lists. `export default mcpServer(...)` is a
-standard `fetch` handler, so the same file can go on any host that takes one
-(Deno Deploy, Val Town, and others). Claude in a browser (claude.ai) needs a
-public URL like that. It can't reach localhost.
+**Over HTTP (optional)**: the same file is also a web server, which is handy
+for looking at it from a browser or curl:
+
+    deno serve -A servers/recipes.ts
+
+Open http://localhost:8000/ to see what the server offers. The page is built
+live from the server's own lists. [docs/how-it-works.md](docs/how-it-works.md)
+explains how one file serves both the page and MCP, and stdio too;
+[docs/mcp-ts.md](docs/mcp-ts.md) walks through mcp.ts piece by piece. Apps that live in the cloud, like claude.ai,
+need a public URL rather than localhost; [docs/claude-app.md](docs/claude-app.md)
+covers that, along with Claude Desktop and the `claude mcp` commands.
+
+**From the web**: `deno serve -A serve-all.ts` runs every server on one port,
+at `/dice`, `/hello` and `/recipes`. A Cloudflare tunnel gives that a public
+HTTPS address, which claude.ai and ChatGPT can use as a connector.
+[docs/remote.md](docs/remote.md) has the steps, how the tunnel works, and
+what went wrong along the way.
 
 ## Making a new server
 
@@ -84,7 +110,7 @@ printf '%s\n' \
 Over HTTP, no `initialize` is needed:
 
 ```sh
-curl -s localhost:8787/ -H 'content-type: application/json' \
+curl -s localhost:8000/ -H 'content-type: application/json' \
   -H 'accept: application/json, text/event-stream' \
   -d '{"jsonrpc":"2.0","id":1,"method":"resources/read","params":{"uri":"recipe://pancakes"}}'
 ```

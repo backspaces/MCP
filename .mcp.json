@@ -1,0 +1,37 @@
+{
+  "mcpServers": {
+    "hello": {
+      "type": "stdio",
+      "command": "deno",
+      "args": [
+        "run",
+        "-A",
+        "./servers/hello.ts",
+        "--stdio"
+      ],
+      "env": {}
+    },
+    "dice": {
+      "type": "stdio",
+      "command": "deno",
+      "args": [
+        "run",
+        "-A",
+        "./servers/dice.ts",
+        "--stdio"
+      ],
+      "env": {}
+    },
+    "recipes": {
+      "type": "stdio",
+      "command": "deno",
+      "args": [
+        "run",
+        "-A",
+        "./servers/recipes.ts",
+        "--stdio"
+      ],
+      "env": {}
+    }
+  }
+}

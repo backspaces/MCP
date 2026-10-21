@@ -101,10 +101,20 @@ export function mcpServer({ name, tools = {}, resources = {}, prompts = {} }) {
   // page for people listing what's here, instead of "Method not allowed".
   const fetch = (req) =>
     req.method === "GET" && !req.headers.get("accept")?.includes("text/event-stream")
-      ? note(handler, name, new URL(req.url).origin + "/")
+      ? note(handler, name, publicUrl(req))
       : handler.fetch(req);
 
   return { fetch };
+}
+
+// The address a caller used, for showing on pages. Behind a tunnel or
+// proxy, requests arrive here as plain http; x-forwarded-proto says
+// whether the caller actually used https.
+export function publicUrl(req) {
+  const url = new URL(req.url);
+  const proto = req.headers.get("x-forwarded-proto");
+  if (proto) url.protocol = proto;
+  return url.origin + url.pathname;
 }
 
 // Ask our own handler one MCP list method, as a client would, so the page
@@ -124,21 +134,26 @@ async function note(handler, name, url) {
   const [{ tools = [] }, { resources = [] }, { resourceTemplates = [] }, { prompts = [] }] =
     await Promise.all(["tools/list", "resources/list", "resources/templates/list", "prompts/list"]
       .map((m) => ask(handler, m)));
-  const section = (title, items) =>
-    items.length ? `${title}:\n${items.map((s) => "  " + s).join("\n")}\n\n` : "";
+  const section = (title, how, items) =>
+    items.length ? `${title}\n${how}\n\n${items.map((s) => "  " + s).join("\n")}\n\n` : "";
   const args = (list) => list.length ? ` (${list.join(", ")})` : "";
   return new Response(`${name}: an MCP server
 
 This address is for AI apps, not browsers. It offers:
 
 ` +
-    section("Tools (the model calls these)", tools.map((t) =>
-      `${t.name}${args(Object.keys(t.inputSchema?.properties ?? {}))}: ${t.description}`)) +
-    section("Resources (you attach these)", [
+    section("Tools",
+      "Just chat in your own words. Claude uses these by itself when they help;\nyou never need to name them.",
+      tools.map((t) => `${t.description} (${t.name})`)) +
+    section("Resources",
+      `Reference material Claude can read. In the Claude Code terminal, type @${name}:\nand pick one to add it to your message. In VS Code, just ask Claude, e.g.\n"read ${resources[0]?.uri ?? resourceTemplates[0]?.uriTemplate}".`,
+      [
       ...resources.map((r) => `${r.uri}: ${r.description ?? r.name}`),
       ...resourceTemplates.map((r) => `${r.uriTemplate}: ${r.description ?? r.name}`),
     ]) +
-    section("Prompts (you pick these)", prompts.map((p) =>
+    section("Prompts",
+      `Ready-made requests. Pick one from the / menu: /${name}:<prompt> in VS Code,\n/mcp__${name}__<prompt> in the terminal.`,
+      prompts.map((p) =>
       `${p.name}${args((p.arguments ?? []).map((a) => a.name))}: ${p.description}`)) +
     `Add it to Claude Code:
   claude mcp add --transport http ${name} ${url}
