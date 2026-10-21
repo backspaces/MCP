@@ -37,7 +37,7 @@ You need a public HTTPS URL that reaches a running copy of the server. A GitHub 
 - **Today, from your Mac (a tunnel).** No account or hosting. It works only while your Mac and both terminals stay running, and the URL changes each time.
 
   ```sh
-  deno serve -A serve-all.ts                                       # terminal 1: every server, at /dice, /hello, /recipes
+  deno serve -A hosts/deno/serve.ts                                # terminal 1: every server, at /dice, /hello, /recipes
   cloudflared tunnel --protocol http2 --url http://localhost:8000   # terminal 2
   ```
 

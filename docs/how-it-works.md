@@ -8,7 +8,7 @@ For a line-by-line walk through mcp.ts, see [mcp-ts.md](mcp-ts.md).
 ## One description, one factory
 
 `mcpServer({ name, tools, resources, prompts })` builds a `makeServer` function
-([mcp.ts:58](../mcp.ts#L58)). Each call makes a fresh `McpServer` from the official
+([mcp.ts:64](../mcp.ts#L64)). Each call makes a fresh `McpServer` from the official
 SDK and registers every tool, resource and prompt on it. The rest of the file
 decides how requests reach it.
 
@@ -23,7 +23,7 @@ which is `{ fetch }`. From then on, for every HTTP request that arrives, Deno ca
 `fetch(request)` and sends back the `Response` it returns. Our code never opens a
 port; it only supplies that one function.
 
-`fetch` is a fork in the road ([mcp.ts:102-105](../mcp.ts#L102-L105)):
+`fetch` is a fork in the road ([mcp.ts:113-116](../mcp.ts#L113-L116)):
 
 ```
                     request on port 8000
@@ -48,16 +48,16 @@ port; it only supplies that one function.
 - **An MCP client** such as Claude Code sends `POST` requests whose body is a
   JSON-RPC message, like `{"method":"tools/call", …}`. These go to
   `handler.fetch`, made by the SDK's `createMcpHandler(makeServer)`
-  ([mcp.ts:98](../mcp.ts#L98)), which does all the protocol work.
+  ([mcp.ts:109](../mcp.ts#L109)), which does all the protocol work.
 - **A browser** sends a plain `GET`. That goes to `note()`
-  ([mcp.ts:123](../mcp.ts#L123)), which replies with a plain-text page describing
+  ([mcp.ts:159](../mcp.ts#L159)), which replies with a plain-text page describing
   the server. Chrome wraps plain text in `<html><body><pre>` to display it; that
   markup isn't from us.
 
 ## The page is built by an MCP client
 
 `note()` doesn't read the `tools` or `resources` objects. It asks the server, the
-way any client would. `ask()` ([mcp.ts:112](../mcp.ts#L112)) builds a `Request` by
+way any client would. `ask()` ([mcp.ts:148](../mcp.ts#L148)) builds a `Request` by
 hand, a `POST` with a JSON-RPC body such as `{"method":"tools/list"}`, and passes it
 straight to `handler.fetch`, with no network involved. It reads the reply and
 returns the list.
@@ -76,8 +76,8 @@ deno run -A servers/recipes.ts --stdio
 ```
 
 `deno run` just runs the file; nothing listens on a port. When `mcp.ts` sees
-`--stdio` in `Deno.args` ([mcp.ts:96](../mcp.ts#L96)), it hands the same
-`makeServer` to the SDK's `serveStdio`, which reads one JSON-RPC message per line
+`--stdio` in the program's arguments ([mcp.ts:104-107](../mcp.ts#L104-L107)), it loads the
+SDK's `serveStdio` and hands it the same `makeServer`, which reads one JSON-RPC message per line
 from stdin and writes each reply as a line on stdout. This is how Claude Code runs
 our servers from `.mcp.json`.
 

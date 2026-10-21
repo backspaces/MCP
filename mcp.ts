@@ -9,13 +9,19 @@
 // `export default mcpServer(...)` runs over HTTP with `deno serve`, or on
 // any host that takes a fetch handler. Run the same file with `--stdio`
 // and it instead talks over stdin/stdout, for apps that start it themselves.
+//
+// This file uses only web standards, so it runs on any host. What's
+// particular to one host lives in hosts/<that host>/.
+//
+// The package names below are resolved from package.json: by Deno through
+// its own cache (deno.json says so), and by Node and Cloudflare's build
+// from node_modules after `npm install`.
 import {
   createMcpHandler,
   McpServer,
   ResourceTemplate,
-} from "npm:@modelcontextprotocol/server@2";
-import { serveStdio } from "npm:@modelcontextprotocol/server@2/stdio";
-import * as z from "npm:zod@4/v4";
+} from "@modelcontextprotocol/server";
+import * as z from "zod/v4";
 
 export { z };
 
@@ -93,7 +99,12 @@ export function mcpServer({ name, tools = {}, resources = {}, prompts = {} }) {
     return server;
   };
 
-  if (Deno.args.includes("--stdio")) serveStdio(makeServer);
+  // Deno and Node spell a program's arguments differently; other hosts
+  // have none. The stdio code loads only when it's used.
+  const args = globalThis.Deno?.args ?? globalThis.process?.argv?.slice(2) ?? [];
+  if (args.includes("--stdio")) {
+    import("@modelcontextprotocol/server/stdio").then(({ serveStdio }) => serveStdio(makeServer));
+  }
 
   const handler = createMcpHandler(makeServer);
 
@@ -105,6 +116,21 @@ export function mcpServer({ name, tools = {}, resources = {}, prompts = {} }) {
       : handler.fetch(req);
 
   return { fetch };
+}
+
+// Several servers at one address, each under its own path:
+// mount({ dice, recipes }) serves /dice and /recipes, and / lists them.
+// Every host serves servers.ts this way.
+export function mount(servers) {
+  return {
+    fetch(req) {
+      const server = servers[new URL(req.url).pathname.split("/")[1]];
+      if (server) return server.fetch(req);
+      const base = publicUrl(req).replace(/\/$/, "");
+      const list = Object.keys(servers).sort().map((n) => `  ${base}/${n}`).join("\n");
+      return new Response(`MCP servers here, one per address:\n\n${list}\n`);
+    },
+  };
 }
 
 // The address a caller used, for showing on pages. Behind a tunnel or

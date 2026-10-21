@@ -1,27 +1,27 @@
 # mcp.ts, piece by piece
 
-[mcp.ts](../mcp.ts) is 146 lines. It takes a plain description of a server and hands
+[mcp.ts](../mcp.ts) is 187 lines. It takes a plain description of a server and hands
 it to the official MCP SDK, so a server file never touches the SDK itself. This walk
 goes top to bottom; read it with `mcp.ts` open beside it.
 [how-it-works.md](how-it-works.md) has the big picture: how requests arrive over HTTP
 and over stdio.
 
-The file has five parts:
+The file has six parts:
 
 | Lines | Part | Job |
 | --- | --- | --- |
-| [1–20](../mcp.ts#L1-L20) | header and imports | what the SDK provides |
-| [22–39](../mcp.ts#L22-L39) | three small helpers | reshape things into MCP's formats |
-| [41–94](../mcp.ts#L41-L94) | `mcpServer` and `makeServer` | turn your objects into SDK calls |
-| [96–107](../mcp.ts#L96-L107) | stdio switch and `fetch` | how requests get in |
-| [110–146](../mcp.ts#L110-L146) | `ask` and `note` | the browser page |
+| [1–26](../mcp.ts#L1-L26) | header and imports | what the SDK provides |
+| [28–45](../mcp.ts#L28-L45) | three small helpers | reshape things into MCP's formats |
+| [47–100](../mcp.ts#L47-L100) | `mcpServer` and `makeServer` | turn your objects into SDK calls |
+| [102–119](../mcp.ts#L102-L119) | stdio switch and `fetch` | how requests get in |
+| [121–144](../mcp.ts#L121-L144) | `mount` and `publicUrl` | several servers at one address |
+| [146–187](../mcp.ts#L146-L187) | `ask` and `note` | the browser page |
 
-## 1. Imports (lines 12–20)
+## 1. Imports (lines 19–26)
 
 ```ts
-import { createMcpHandler, McpServer, ResourceTemplate } from "npm:@modelcontextprotocol/server@2";
-import { serveStdio } from "npm:@modelcontextprotocol/server@2/stdio";
-import * as z from "npm:zod@4/v4";
+import { createMcpHandler, McpServer, ResourceTemplate } from "@modelcontextprotocol/server";
+import * as z from "zod/v4";
 
 export { z };
 ```
@@ -31,34 +31,41 @@ export { z };
 - **`ResourceTemplate`** describes a resource URI with blanks, like `recipe://{name}`.
 - **`createMcpHandler`** wraps a server in a web `fetch` handler: a Request goes in,
   a Response comes out. This is the HTTP side.
-- **`serveStdio`** connects a server to stdin and stdout. This is the stdio side.
+- **`serveStdio`**, the stdio side, connects a server to stdin and stdout. It isn't
+  imported here: it's loaded only when `--stdio` is given (part 4).
 - **`z`** is [Zod](https://zod.dev), a library for describing data shapes such as
   `z.string().min(1)`. MCP needs a schema for every tool's arguments, and the SDK
   takes Zod. `export { z }` lets a server file write
   `import { mcpServer, z } from "../mcp.ts"` and never import Zod itself.
 
-Each import is a package address:
+Each import is a package name from the npm registry:
 
 ```
-npm:@modelcontextprotocol/server@2/stdio
-└┬─┘└──────────┬─────────┘└──┬─┘└┬┘└─┬─┘
-from npm     scope      package ver subpath
+@modelcontextprotocol/server/stdio
+└─────────┬─────────┘└──┬─┘└─┬─┘
+        scope      package  subpath
 ```
 
-- **`npm:`** means "a package from the npm registry". Deno downloads it into its
-  own cache the first time, so there's no `npm install` and no `node_modules`.
 - **`@modelcontextprotocol`** is the scope, a namespace only the MCP project can
   publish under. `zod` has no scope.
-- **`@2`** means any 2.x release. `deno.lock` pins the exact version (2.3.0).
-- **`/stdio`** is a subpath: a separate entry point inside the package, so code
-  that doesn't use stdio doesn't load it.
+- **`/stdio`** and **`/v4`** are subpaths: separate entry points inside a package,
+  so code that doesn't use stdio doesn't load it.
+- **The versions** are in [package.json](../package.json): `^2.3.0` means 2.3.0 or
+  any later 2.x. The lock file pins the exact one.
 
-The package name is universal, but the `npm:` prefix is Deno's own. Node, Bun and
-Cloudflare's bundler write the bare name (`"@modelcontextprotocol/server"`) and
-find it in `node_modules`, with the version in `package.json`. If `mcp.ts` ever
-moves off Deno, these three lines are the main thing to change.
+The names are bare, with no version or `npm:` prefix, so the same lines work on
+every host:
 
-## 2. Three helpers (lines 22–39)
+- **Deno** reads `package.json` and, because [deno.json](../deno.json) sets
+  `"nodeModulesDir": "none"`, downloads the packages into its own cache. There's
+  no `npm install` and no `node_modules`.
+- **Node and Cloudflare's build tool** find them in `node_modules`, which
+  `npm install` fills.
+
+Deno also has its own form, `npm:zod@4/v4`, which we used at first. Only Deno
+understands it.
+
+## 2. Three helpers (lines 28–45)
 
 ```ts
 const hints = ({ readOnly, destructive }) => ({
@@ -94,7 +101,7 @@ error message becomes a result marked `isError: true`. The model then reads
 "No recipe called 'tacos'" and can try something else, instead of the whole call
 failing. `await` means `run` may be a normal function or an `async` one.
 
-## 3. `mcpServer` and `makeServer` (lines 41–94)
+## 3. `mcpServer` and `makeServer` (lines 47–100)
 
 Lines 41–56 are a comment giving the shape of the object you pass in. Then:
 
@@ -111,7 +118,7 @@ export function mcpServer({ name, tools = {}, resources = {}, prompts = {} }) {
 server each time it's called. The SDK gets the factory rather than one server,
 so it can make a new one whenever it needs one.
 
-### Tools (lines 61–67)
+### Tools (lines 67–73)
 
 ```ts
 for (const [toolName, tool] of Object.entries(tools)) {
@@ -138,7 +145,7 @@ The schema does two jobs. The SDK turns it into JSON Schema for `tools/list`, wh
 is how Claude learns the tool takes a `word`. It also checks incoming arguments, so
 `run` never sees a missing or empty `word`.
 
-### Resources (lines 69–82)
+### Resources (lines 75–88)
 
 ```ts
 const meta = { description: res.description, mimeType: res.mimeType ?? "text/plain" };
@@ -156,7 +163,7 @@ Then two cases, decided by whether the URI has a `{`:
   is how the `@` menu knows about pancakes, guacamole and omelette.
 - **A plain URI** (`recipe://index`): registered as it is, and `read` gets nothing.
 
-### Prompts (lines 84–91)
+### Prompts (lines 90–97)
 
 ```ts
 server.registerPrompt(promptName, {
@@ -171,21 +178,33 @@ A prompt's result is a list of chat messages. Ours is always one user message: t
 text your `run` returns. That's why `/mcp__recipes__plan_meal 6` makes "Plan a meal
 for 6 people…" appear as if you had typed it.
 
-## 4. How requests get in (lines 96–107)
+## 4. How requests get in (lines 102–119)
 
 ```ts
-if (Deno.args.includes("--stdio")) serveStdio(makeServer);
+const args = globalThis.Deno?.args ?? globalThis.process?.argv?.slice(2) ?? [];
+if (args.includes("--stdio")) {
+  import("@modelcontextprotocol/server/stdio").then(({ serveStdio }) => serveStdio(makeServer));
+}
 ```
 
 Run with `--stdio`, and the SDK reads requests from stdin and writes replies to
 stdout. The process then stays alive, waiting for the next line.
+
+The first line finds the program's arguments wherever it runs: `Deno.args` under
+Deno, `process.argv` under Node (minus its first two entries, the node program
+and the script). Cloudflare and other web hosts have no arguments, so the answer
+is an empty list. `?.` stops at whatever doesn't exist instead of failing.
+
+`import(…)` with parentheses loads a module while the program runs, rather than
+before. So the stdio code, which web hosts can't use, is loaded only when it's
+needed.
 
 ```ts
 const handler = createMcpHandler(makeServer);
 
 const fetch = (req) =>
   req.method === "GET" && !req.headers.get("accept")?.includes("text/event-stream")
-    ? note(handler, name, new URL(req.url).origin + "/")
+    ? note(handler, name, publicUrl(req))
     : handler.fetch(req);
 
 return { fetch };
@@ -204,7 +223,31 @@ looks for exactly that shape and calls `fetch` for every request.
 This part runs even under stdio. It's harmless: it only builds a function that
 nothing calls. It's also why Deno warns about `export default { fetch }`.
 
-## 5. The browser page (lines 110–146)
+## 5. Several servers at one address (lines 121–144)
+
+```ts
+export function mount(servers) {
+  return {
+    fetch(req) {
+      const server = servers[new URL(req.url).pathname.split("/")[1]];
+      if (server) return server.fetch(req);
+      // … otherwise a page listing each server's address
+    },
+  };
+}
+```
+
+`mount({ dice, recipes })` is one `{ fetch }` for several servers. The first part of
+the path picks the server: `/dice` goes to dice, `/recipes/…` to recipes. Anything
+else gets a page listing them. Every host serves [servers.ts](../servers.ts) through
+it, so `/dice` means the same everywhere.
+
+`publicUrl(req)` is the address the caller used, for showing on pages. Behind a
+tunnel or proxy, a request reaches us as plain http even when the caller used
+https; the proxy says which in the `x-forwarded-proto` header, and `publicUrl`
+puts it back.
+
+## 6. The browser page (lines 146–187)
 
 ```ts
 async function ask(handler, method) {

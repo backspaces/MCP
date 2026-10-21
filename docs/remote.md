@@ -21,12 +21,12 @@ that address. So:
 Claude Code is unchanged by all this. It still starts each server itself
 over stdio, from [.mcp.json](../.mcp.json).
 
-## One file, every server: serve-all.ts
+## One address, every server
 
 Each server file already works as a web server (`deno serve -A
 servers/dice.ts`), but that's one server per port.
-[serve-all.ts](../serve-all.ts) puts every file in `servers/` on one port,
-each under its own path:
+[hosts/deno/serve.ts](../hosts/deno/serve.ts) puts every server listed in
+[servers.ts](../servers.ts) on one port, each under its own path:
 
 | Path | Server |
 | --- | --- |
@@ -35,7 +35,7 @@ each under its own path:
 | `/hello` | hello |
 | `/recipes` | recipes |
 
-A new file in `servers/` shows up by itself. Opening `/dice` in a browser
+A new server needs one line in `servers.ts`. Opening `/dice` in a browser
 shows that server's info page, and MCP requests to `/dice` go to the dice
 server.
 
@@ -104,7 +104,7 @@ after a long-overdue self-update. Nothing in it was installed.
 Two terminals, both left running. Stop anything else on port 8000 first.
 
 ```sh
-deno serve -A serve-all.ts                                  # terminal A
+deno serve -A hosts/deno/serve.ts                           # terminal A
 cloudflared tunnel --protocol http2 --url http://localhost:8000    # terminal B
 ```
 

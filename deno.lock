@@ -1,8 +1,8 @@
 {
   "version": "5",
   "specifiers": {
-    "npm:@modelcontextprotocol/server@2": "2.3.0",
-    "npm:zod@4": "4.6.5"
+    "npm:@modelcontextprotocol/server@^2.3.0": "2.3.0",
+    "npm:zod@^4.6.5": "4.6.5"
   },
   "npm": {
     "@modelcontextprotocol/core@2.3.0": {
@@ -20,6 +20,14 @@
     },
     "zod@4.6.5": {
       "integrity": "sha512-v5l/aFXZQeai4awLbOpSoHecE9UiMrnfx75tEXLjNonXVARxQ5mOeipTjROUchszUNCqnE+hqAMujRsRHsut2Q=="
+    }
+  },
+  "workspace": {
+    "packageJson": {
+      "dependencies": [
+        "npm:@modelcontextprotocol/server@^2.3.0",
+        "npm:zod@^4.6.5"
+      ]
     }
   }
 }

@@ -1,3 +1,4 @@
 {
-  "compilerOptions": { "strict": false }
+  "compilerOptions": { "strict": false },
+  "nodeModulesDir": "none"
 }

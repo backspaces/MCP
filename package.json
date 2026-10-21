@@ -1,0 +1,10 @@
+{
+  "name": "mcp",
+  "private": true,
+  "type": "module",
+  "description": "Small MCP servers to copy from, one file each, over a shared mcp.ts.",
+  "dependencies": {
+    "@modelcontextprotocol/server": "^2.3.0",
+    "zod": "^4.6.5"
+  }
+}

@@ -67,15 +67,35 @@ explains how one file serves both the page and MCP, and stdio too;
 need a public URL rather than localhost; [docs/claude-app.md](docs/claude-app.md)
 covers that, along with Claude Desktop and the `claude mcp` commands.
 
-**From the web**: `deno serve -A serve-all.ts` runs every server on one port,
-at `/dice`, `/hello` and `/recipes`. A Cloudflare tunnel gives that a public
+**From the web**: `deno serve -A hosts/deno/serve.ts` runs every server on one
+port, at `/dice`, `/hello` and `/recipes`. A Cloudflare tunnel gives that a public
 HTTPS address, which claude.ai and ChatGPT can use as a connector.
 [docs/remote.md](docs/remote.md) has the steps, how the tunnel works, and
 what went wrong along the way.
 
+## Layout
+
+```
+servers/        what each server offers, one file each
+servers.ts      the list of servers the web hosts serve
+mcp.ts          turns a server file into MCP over HTTP or stdio
+hosts/<host>/   everything particular to one place the servers run
+docs/
+```
+
+Nothing outside `hosts/` knows where it runs: the servers and `mcp.ts` use only
+web standards. Each host's folder holds its entry file and its own settings.
+Today there's one:
+
+- [hosts/deno/](hosts/deno/): `deno serve` on any machine, such as your Mac behind
+  a tunnel.
+
+Dependencies are in [package.json](package.json), which Deno, Node and
+Cloudflare's build tool all read. Deno needs no `npm install`; the others do.
+
 ## Making a new server
 
-Copy `hello.ts` and fill in:
+Copy `hello.ts`, add a line for it to [servers.ts](servers.ts), and fill in:
 
 ```ts
 export default mcpServer({
