@@ -1,4 +1,10 @@
 {
   "compilerOptions": { "strict": false },
-  "nodeModulesDir": "none"
+  "nodeModulesDir": "none",
+  "tasks": {
+    "serve": "deno serve -A hosts/deno/serve.ts",
+    "cf": "deno run -A npm:wrangler@4.151.3 --config hosts/cloudflare/wrangler.jsonc",
+    "cf:dev": "deno task cf dev",
+    "cf:deploy": "deno task cf deploy"
+  }
 }

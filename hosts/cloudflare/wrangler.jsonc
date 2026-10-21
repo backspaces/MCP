@@ -1,0 +1,13 @@
+// Cloudflare's settings for our Worker. Paths are relative to this file.
+{
+  // The Worker's name: its address is https://mcp.<your-subdomain>.workers.dev
+  "name": "mcp",
+  "main": "worker.ts",
+  // Which version of the Workers runtime to behave like. Moving it later
+  // opts in to newer behavior.
+  "compatibility_date": "2026-10-01",
+  // Node's built-in modules (node:process and friends), which the MCP
+  // library may reach for.
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true }
+}

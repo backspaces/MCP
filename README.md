@@ -85,10 +85,12 @@ docs/
 
 Nothing outside `hosts/` knows where it runs: the servers and `mcp.ts` use only
 web standards. Each host's folder holds its entry file and its own settings.
-Today there's one:
+Today there are two:
 
 - [hosts/deno/](hosts/deno/): `deno serve` on any machine, such as your Mac behind
-  a tunnel.
+  a tunnel (`deno task serve`).
+- [hosts/cloudflare/](hosts/cloudflare/): Cloudflare Workers, at a fixed
+  `workers.dev` address. Its README explains Cloudflare and the steps.
 
 Dependencies are in [package.json](package.json), which Deno, Node and
 Cloudflare's build tool all read. Deno needs no `npm install`; the others do.
