@@ -4,8 +4,13 @@ Oct 21, 2026 · Owen Densmore
 
 claude.ai, ChatGPT and Gemini run in the cloud, so they can't start our
 servers the way Claude Code does. They need a public HTTPS address that
-reaches a running server. This page covers how we got one from a Mac with a
-Cloudflare tunnel, and what we learned along the way.
+reaches a running server. This page covers how we first got one from a Mac
+with a Cloudflare tunnel, and what we learned along the way.
+
+The servers now run for good on Cloudflare Workers, at
+`https://mcp.backspaces.workers.dev/<server>`; see
+[hosts/cloudflare/README.md](../hosts/cloudflare/README.md). The tunnel is
+still handy for trying out changes on your Mac before deploying them.
 
 ## Nothing is installed into the AI app
 
@@ -73,7 +78,8 @@ the pages show `https://` addresses.
 | Good for | trying things out | daily use from your own Mac |
 
 Either way, the address works only while your Mac is awake and both programs
-are running. For always-on, the servers need a host (still to be decided).
+are running. For always-on, we use Cloudflare Workers instead (see the top of
+this page).
 
 ## The steps we took
 
@@ -178,11 +184,15 @@ With no sign in, anyone who finds the address can call the servers while the
 tunnel runs. That's fine for dice and recipes. Anything private needs a login
 (OAuth) before it goes online.
 
-## Next
+## Other apps
 
-- ChatGPT: Settings → Apps & Connectors → Advanced → Developer mode, then the
-  same addresses. It mostly uses tools; resources and prompts are mostly
-  ignored.
-- Gemini: custom connectors were reported rolling out to US personal
-  accounts in mid-2026, not yet confirmed here.
-- An always-on host, so none of this depends on the Mac.
+- **ChatGPT** (worked on a Plus account, Oct 2026): **Plugins → Add → Add
+  custom MCP server**. Name `dice`, connection **Server URL** with the address
+  plus `/dice`, authentication **No authentication** (the default, OAuth,
+  fails: we have no sign-in), tick "I understand", then **Create as a
+  plugin** and **Connect dice**. The first chat showed "@ Rolled three
+  six-sided dice", ChatGPT's mark of a call to our app, and `deno task cf tail`
+  showed the request arrive. ChatGPT mostly uses tools; resources and prompts
+  are mostly ignored.
+- **Gemini**: custom connectors were reported rolling out to US personal
+  accounts in mid-2026, not yet tried here.

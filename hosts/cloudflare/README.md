@@ -108,7 +108,7 @@ One connector per server: `/dice`, `/recipes`, `/hello`.
 
 ## Watching it
 
-- `deno task cf tail` streams each request and any `console.log` from the live
+- `deno task cf:tail` streams each request and any `console.log` from the live
   Worker, as it happens.
 - The Cloudflare dashboard, under **Workers & Pages → mcp**, shows requests,
   errors and logs (`observability` is on in `wrangler.jsonc`), and its

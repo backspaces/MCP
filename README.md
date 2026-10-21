@@ -95,6 +95,38 @@ Today there are two:
 Dependencies are in [package.json](package.json), which Deno, Node and
 Cloudflare's build tool all read. Deno needs no `npm install`; the others do.
 
+## Commands
+
+Shortcuts live under `tasks` in [deno.json](deno.json); `deno task` with no name
+lists them. Run them from the repo root.
+
+| Command | What it does |
+| --- | --- |
+| `deno task serve` | every server on http://localhost:8000, at `/dice`, `/hello`, `/recipes` |
+| `deno task cf:dev` | the same on Cloudflare's runtime, locally, at http://localhost:8787 |
+| `deno task cf:deploy` | publish to https://mcp.backspaces.workers.dev; same address every time |
+| `deno task cf:tail` | watch requests to the live Worker as they arrive (Ctrl-C stops) |
+| `deno task cf <command>` | any other Wrangler command, below |
+
+`deno task cf` is Cloudflare's tool, Wrangler, run through Deno with our
+settings, so `deno task cf whoami` is `wrangler whoami`. The useful ones:
+
+| Command | What it does |
+| --- | --- |
+| `deno task cf login` / `logout` | sign Wrangler in to your Cloudflare account, or out |
+| `deno task cf whoami` | which account Wrangler is using |
+| `deno task cf deployments list` | the last 10 deploys, with dates and version ids |
+| `deno task cf rollback` | go back to the previous deploy (or name a version id) |
+| `deno task cf delete` | remove the Worker and its address |
+| `deno task cf --help` | everything else |
+
+The Cloudflare commands need `npm install` once first;
+[hosts/cloudflare/README.md](hosts/cloudflare/README.md) has the details.
+Claude Code needs no command: it starts the servers itself from `.mcp.json`.
+
+The whole story of how this came together is in
+[docs/walkthrough.md](docs/walkthrough.md).
+
 ## Making a new server
 
 Copy `hello.ts`, add a line for it to [servers.ts](servers.ts), and fill in:

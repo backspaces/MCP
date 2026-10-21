@@ -34,7 +34,7 @@ You need a public HTTPS URL that reaches a running copy of the server. A GitHub 
 
 **Step 1: get a public URL.** Pick one.
 
-- **Today, from your Mac (a tunnel).** No account or hosting. It works only while your Mac and both terminals stay running, and the URL changes each time.
+- **For testing, from your Mac (a tunnel).** No account or hosting. It works only while your Mac and both terminals stay running, and the URL changes each time.
 
   ```sh
   deno serve -A hosts/deno/serve.ts                                # terminal 1: every server, at /dice, /hello, /recipes
@@ -42,7 +42,7 @@ You need a public HTTPS URL that reaches a running copy of the server. A GitHub 
   ```
 
   It prints a URL like `https://some-random-words.trycloudflare.com`. Each server is that URL plus its name, such as `…/recipes`; the bare URL only lists them. Use `--protocol http2`: the default (QUIC) kept dropping on our home network. Installing cloudflared on macOS 14 needed Cloudflare's ready-built download rather than Homebrew; [remote.md](remote.md) has those steps and how the tunnel works.
-- **Later, always on (a host).** Val Town or Cloudflare Workers runs the same file for you and gives a fixed address, such as `https://backspaces-recipes.web.val.run` or `https://recipes.backspaces.workers.dev`. Which host is still to be decided.
+- **Always on (a host).** Our servers run on Cloudflare Workers at a fixed address, with nothing running on your Mac: `https://mcp.backspaces.workers.dev/recipes`, and likewise `/dice` and `/hello`. This is the address to use. [hosts/cloudflare/README.md](../hosts/cloudflare/README.md) explains Workers and how to deploy.
 
 Check the URL plus /recipes in a browser first: you should see the "recipes: an MCP server" page.
 
