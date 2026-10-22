@@ -8,11 +8,18 @@ MCP is not an AI. An MCP server adds abilities to an AI app you already use
 
 ## The three things a server can offer
 
-| Kind | Who uses it | What it's for | In Claude Code |
-| --- | --- | --- | --- |
-| **Tools** | the model, when it decides to | do something or look something up | used automatically |
-| **Resources** | you (or the app) attach them | read-only data, each at a URI | type `@` and pick one |
-| **Prompts** | you pick them | canned instructions with blanks | `/mcp__recipes__plan_meal` |
+| Kind | Who uses it | What it's for | Claude Code in the terminal | Claude Code in VS Code |
+| --- | --- | --- | --- | --- |
+| **Tools** | the model, when it decides to | do something or look something up | used automatically | used automatically |
+| **Resources** | you (or the app) attach them | read-only data, each at a URI | type `@recipes:` and pick one | ask: "read recipe://pancakes" |
+| **Prompts** | you pick them | canned instructions with blanks | `/mcp__recipes__plan_meal` | `/recipes:plan_meal (MCP)` |
+
+The two spell a prompt differently. The terminal's name is `mcp__`, the server's
+name, `__`, then the prompt's name: `/mcp__recipes__plan_meal`. VS Code shows the
+same prompt as `/recipes:plan_meal`. In VS Code, pick it from the `/` menu and
+fill in the blanks when asked; typed on one line with its arguments, it doesn't
+run. VS Code's `@` lists only workspace files, not resources, so there you ask
+Claude to read one instead.
 
 Tools are the main event. Many apps support only tools, so treat resources and
 prompts as extras.
