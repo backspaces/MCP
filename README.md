@@ -12,10 +12,11 @@ MCP is not an AI. An MCP server adds abilities to an AI app you already use
 | --- | --- | --- | --- | --- |
 | **Tools** | the model, when it decides to | do something or look something up | used automatically | used automatically |
 | **Resources** | you (or the app) attach them | read-only data, each at a URI | type `@recipes:` and pick one | ask: "read recipe://pancakes" |
-| **Prompts** | you pick them | canned instructions with blanks | `/recipes:plan_meal (MCP)` | `/recipes:plan_meal (MCP)` |
+| **Prompts** | you pick them | canned instructions with blanks | type `/recipes:` and pick one | type `/recipes:` and pick one |
 
-Both list a prompt in the `/` menu as `/<server>:<prompt> (MCP)`, so
-`/recipes:plan_meal (MCP)`. Pick it there and fill in the blanks when asked. In
+Both list a prompt in the `/` menu as `/<server>:<prompt>`, so
+`/recipes:plan_meal`, tagged `(MCP)` to show it comes from a server. Pick it
+there and fill in the blanks when asked. In
 the terminal, the older spelling `/mcp__recipes__plan_meal 6` also works when
 typed out, with arguments separated by spaces (so each argument is one word).
 Either way the server has to be connected first: right after `claude` starts,
