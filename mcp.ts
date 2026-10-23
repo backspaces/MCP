@@ -178,7 +178,7 @@ This address is for AI apps, not browsers. It offers:
       ...resourceTemplates.map((r) => `${r.uriTemplate}: ${r.description ?? r.name}`),
     ]) +
     section("Prompts",
-      `Ready-made requests. Pick one from the / menu: /${name}:<prompt> in VS Code,\n/mcp__${name}__<prompt> in the terminal.`,
+      `Ready-made requests. Pick one from the / menu, where it shows as\n/${name}:<prompt> (MCP).`,
       prompts.map((p) =>
       `${p.name}${args((p.arguments ?? []).map((a) => a.name))}: ${p.description}`)) +
     `Add it to Claude Code:

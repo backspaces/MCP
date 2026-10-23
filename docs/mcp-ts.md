@@ -175,9 +175,9 @@ server.registerPrompt(promptName, {
 ```
 
 A prompt's result is a list of chat messages. Ours is always one user message: the
-text your `run` returns. That's why `/mcp__recipes__plan_meal 6` in the terminal (or
-`/recipes:plan_meal` in VS Code, with 6 filled in) makes "Plan a meal for 6
-people…" appear as if you had typed it.
+text your `run` returns. That's why picking `/recipes:plan_meal (MCP)` with 6 guests (or typing
+`/mcp__recipes__plan_meal 6` in the terminal) makes "Plan a meal for 6 people…"
+appear as if you had typed it.
 
 ## 4. How requests get in (lines 102–119)
 

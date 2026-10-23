@@ -12,14 +12,18 @@ MCP is not an AI. An MCP server adds abilities to an AI app you already use
 | --- | --- | --- | --- | --- |
 | **Tools** | the model, when it decides to | do something or look something up | used automatically | used automatically |
 | **Resources** | you (or the app) attach them | read-only data, each at a URI | type `@recipes:` and pick one | ask: "read recipe://pancakes" |
-| **Prompts** | you pick them | canned instructions with blanks | `/mcp__recipes__plan_meal` | `/recipes:plan_meal (MCP)` |
+| **Prompts** | you pick them | canned instructions with blanks | `/recipes:plan_meal (MCP)` | `/recipes:plan_meal (MCP)` |
 
-The two spell a prompt differently. The terminal's name is `mcp__`, the server's
-name, `__`, then the prompt's name: `/mcp__recipes__plan_meal`. VS Code shows the
-same prompt as `/recipes:plan_meal`. In VS Code, pick it from the `/` menu and
-fill in the blanks when asked; typed on one line with its arguments, it doesn't
-run. VS Code's `@` lists only workspace files, not resources, so there you ask
-Claude to read one instead.
+Both list a prompt in the `/` menu as `/<server>:<prompt> (MCP)`, so
+`/recipes:plan_meal (MCP)`. Pick it there and fill in the blanks when asked. In
+the terminal, the older spelling `/mcp__recipes__plan_meal 6` also works when
+typed out, with arguments separated by spaces (so each argument is one word).
+Either way the server has to be connected first: right after `claude` starts,
+or before you've approved `.mcp.json`, you get "Unknown command". `/mcp` shows
+which servers are connected.
+
+VS Code's `@` lists only workspace files, not resources, so there you ask Claude
+to read one instead.
 
 Tools are the main event. Many apps support only tools, so treat resources and
 prompts as extras.
