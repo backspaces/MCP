@@ -173,10 +173,15 @@ printf '%s\n' \
   | deno run -A servers/dice.ts --stdio
 ```
 
-Over HTTP, no `initialize` is needed:
+Deno also prints `warning: Detected export default { fetch }, did you mean to run
+"deno serve"?` on stderr. It's harmless: the same file serves HTTP too, and
+`--stdio` picks stdio.
+
+Over HTTP, no `initialize` is needed. Start `deno task serve` in another terminal
+first, then:
 
 ```sh
-curl -s localhost:8000/ -H 'content-type: application/json' \
+curl -sS localhost:8000/recipes -H 'content-type: application/json' \
   -H 'accept: application/json, text/event-stream' \
   -d '{"jsonrpc":"2.0","id":1,"method":"resources/read","params":{"uri":"recipe://pancakes"}}'
 ```

@@ -128,7 +128,7 @@ activity`, and the tunnel was down for up to 50 seconds before reconnecting.
 A real MCP call through the public address:
 
 ```sh
-curl -s https://<your-address>/dice \
+curl -sS https://<your-address>/dice \
   -H 'content-type: application/json' \
   -H 'accept: application/json, text/event-stream' \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"flip_coin","arguments":{}}}'
