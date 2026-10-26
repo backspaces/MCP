@@ -136,6 +136,9 @@ The Cloudflare commands need `npm install` once first;
 [hosts/cloudflare/README.md](hosts/cloudflare/README.md) has the details.
 Claude Code needs no command: it starts the servers itself from `.mcp.json`.
 
+To test a server directly, without an AI app in between (the MCP Inspector,
+`claude --debug=mcp`, curl and a few more), see [docs/tools.md](docs/tools.md).
+
 The whole story of how this came together is in
 [docs/walkthrough.md](docs/walkthrough.md).
 
